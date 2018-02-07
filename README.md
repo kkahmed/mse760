@@ -1,2 +1,2 @@
-# me760
+# mse760
 MD and MC sims
