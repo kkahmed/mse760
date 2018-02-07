@@ -1,0 +1,32 @@
+/*pos[0][0][i][j][k] = i*a2;
+pos[0][1][i][j][k] = j*a2;
+pos[0][2][i][j][k] = k*a2;
+
+pos[1][0][i][j][k] = (i+0.5)*a2;
+pos[1][1][i][j][k] = (j+0.5)*a2;
+pos[1][2][i][j][k] = k*a2;
+
+pos[2][0][i][j][k] = (i+0.5)*a2;
+pos[2][1][i][j][k] = j*a2;
+pos[2][2][i][j][k] = (k+0.5)*a2;
+
+pos[3][0][i][j][k] = i*a2;
+pos[3][1][i][j][k] = (j+0.5)*a2;
+pos[3][2][i][j][k] = (k+0.5)*a2;*/
+
+/*
+ * The input (decided against this, if N isn't known until runtime, arrays must
+ * be dealt with differently - in c++ would have to use vectors for dynamic size)
+if (argc != 1)
+{
+  std::cerr << "Just provide the number N (in NxNxN cells) as command argument" << std::endl;
+  return 1;
+}
+char *end;
+int N = strtol(argv[1], &end, 10);
+if (*end != '\0')
+{
+  std::cout << "Must be an integer"  << std::endl;
+  return 1;
+}
+*/
