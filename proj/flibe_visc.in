@@ -1,0 +1,74 @@
+#------------------------------------------------------------------
+#  Basic setup
+#------------------------------------------------------------------
+units           metal         	# Angstrom, eV, ps, bar
+boundary        p p p         	# Periodic boundaries in all dimensions.
+atom_style      charge        	# Pair potentials.
+
+#------------------------------------------------------------------
+#  Define FLiBe
+#------------------------------------------------------------------
+read_data traj2			# No real structure, will melt anyway	
+replicate 7 7 7 
+mass	1	18.9984032
+mass	2	9.012182
+mass	3	6.941
+pair_style	born/coul/long	7.0
+pair_coeff	1 1 0.238810197 0.233427437 2.32 7.39462863 -14.86155745
+pair_coeff	1 2 1.415278414 0.234773736 1.57 0.00000000   0.00000000
+pair_coeff	1 3 1.261327879 0.257884990 1.57 0.00000000   0.00000000
+pair_coeff	2 2 6.405067964 0.134173428 0.82 0.00000000   0.00000000
+pair_coeff	3 3 0.002789645 0.124454374 1.80 0.00000000   0.00000000
+pair_coeff	2 3 0.206709557 0.132295000 1.31 0.00000000   0.00000000
+
+#------------------------------------------------------------------
+#  Problem description
+#------------------------------------------------------------------
+variable	Tem equal 900.0
+neigh_modify	every 1 delay 0
+velocity	all create ${Tem} 195730
+kspace_style	pppm 1.0e-4
+
+#------------------------------------------------------------------
+#  Equilibriation
+#------------------------------------------------------------------
+#fix	1	all nve
+fix	2	all npt temp ${Tem} ${Tem} 3.0 iso 10.0 10.0 3.0
+#fix	3 	all nvt temp 759 759 1.0
+thermo	100
+timestep	0.001
+run	250000
+unfix 	2
+#fix	1	all nve
+fix	3	all nvt temp ${Tem} ${Tem} 5.0
+run	20000
+
+#------------------------------------------------------------------
+#  Green-Kubo
+#------------------------------------------------------------------
+variable         pxz equal pxz
+variable         pxy equal pxy
+variable         pyz equal pyz #-press
+thermo 	3000
+
+fix              SS all ave/correlate 5 600 3000 &
+                 v_pxz v_pxy v_pyz type auto file ss.3d ave running
+
+variable 	kb equal 1.38065e-23
+variable	barPa2 equal 1.0e10
+variable	Am3 equal 1.0e-30
+variable	ps2s equal 1.0e-12
+variable 	convert equal ${barPa2}*${ps2s}*${Am3}
+variable         scale equal ${convert}/(${kb}*${Tem})*vol*5*dt
+#variable         diagfac equal 2-2/3
+variable         vxz equal trap(f_SS[3])*${scale}
+variable         vxy equal trap(f_SS[4])*${scale}
+variable         vyz equal trap(f_SS[5])*${scale} 
+variable         etaxz equal v_vxz
+variable         etaxy equal v_vxy
+variable         etayz equal v_vyz
+#variable         eta equal (${etaxz}+${etaxy}+${etayz})/3.0
+#print "running average viscosity: ${eta}"
+
+thermo_style     custom step temp press pxz pxy pyz v_vxz v_vxy v_vyz #v_eta
+run              600000
